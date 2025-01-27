@@ -1,33 +1,16 @@
 import streamlit as st
 
+from mongo import get_document_by_id
+
 # Set page configuration for Arabic layout
 st.set_page_config(page_title="بحث القرآن", page_icon="📖", layout="centered")
 
+ids_list = ["668462ced1cadd3592ad47be",
+            "668462ced1cadd3592ad47c6",
+            "668462ced1cadd3592ad47e3",
+            "668462ced1cadd3592ad47ef"]
 # Simulated results (full details of ayah)
-results = [
-    {
-        "_id": {"$oid": "67974cb35e8e7e6047695ee3"},
-        "surah_no": 2,
-        "surah_name_en": "The Cow",
-        "surah_name_ar": "البقرة",
-        "surah_name_roman": "Al-Baqarah",
-        "ayah_no_surah": 9,
-        "ayah_no_quran": 16,
-        "ayah_ar": "يُخَٰدِعُونَ ٱللَّهَ وَٱلَّذِينَ ءَامَنُوا۟ وَمَا يَخْدَعُونَ إِلَّآ أَنفُسَهُمْ وَمَا يَشْعُرُونَ",
-        "ayah_en": "They seek to deceive Allah and the believers, yet they only deceive themselves, but they fail to perceive it.",
-        "ruko_no": 3,
-        "juz_no": 1,
-        "manzil_no": 1,
-        "hizb_quarter": 1,
-        "total_ayah_surah": 286,
-        "place_of_revelation": "Medinan",
-        "sajah_ayah": False,
-        "no_of_word_ayah": 10,
-        "list_of_words": ["يُخَٰدِعُونَ", "ٱللَّهَ", "وَٱلَّذِينَ", "ءَامَنُوا۟", "وَمَا", "يَخْدَعُونَ", "إِلَّآ",
-                          "أَنفُسَهُمْ", "وَمَا", "يَشْعُرُونَ"],
-        "Ayah_without_tashkil": "يخادعون الله والذين آمنوا وما يخدعون إلا أنفسهم وما يشعرون"
-    }
-]
+results = get_document_by_id(ids_list)
 
 # Custom CSS for a dark theme with Arabic font and professional header box
 st.markdown("""
@@ -129,6 +112,32 @@ st.markdown("""
         color: #4CAF50; /* Green color, associated with the Quran */
         text-align: center;
         margin-bottom: 15px;
+    }
+
+    /* Style for the form submit button */
+    .stButton>button {
+        background-color: #9C27B0; /* Purple color for professional look */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Hover effect for the button */
+    .stButton>button:hover {
+        background-color: #7B1FA2; /* Slightly darker purple on hover */
+        transform: scale(1.05);
+    }
+
+    /* Focus effect for the button */
+    .stButton>button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #9C27B0; /* Add focus ring */
     }
     </style>
 """, unsafe_allow_html=True)

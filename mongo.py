@@ -1,3 +1,4 @@
+from bson import ObjectId
 from pymongo import MongoClient
 
 # Connect to the local MongoDB instance
@@ -6,8 +7,15 @@ db = mongo_client['Qurani']
 collection = db['qurani']
 documents = collection.find()
 
-# Print documents
-for document in documents:
-    mongo_id = str(document['_id'])
-    surah_name_ar = document['surah_name_ar']
-    print(f"MongoDB document ID: {mongo_id}, Surah name: {surah_name_ar}")
+
+
+def get_document_by_id(ids_list: list):
+    """
+    Get a document from MongoDB by its ID.
+    """
+    documents = []
+    for mongo_id in ids_list:
+        document = collection.find_one({"_id": ObjectId(mongo_id)})
+        if document:
+            documents.append(document)
+    return documents

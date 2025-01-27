@@ -1,0 +1,4 @@
+cohere==5.13.11
+pymongo==4.10.1
+qdrant-client==1.13.2
+streamlit~=1.41.1
