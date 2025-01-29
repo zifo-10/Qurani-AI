@@ -1,178 +1,168 @@
 import streamlit as st
 
-from mongo import get_document_by_id
-
 # Set page configuration for Arabic layout
-st.set_page_config(page_title="بحث القرآن", page_icon="📖", layout="centered")
+st.set_page_config(page_title="الباحث القرآني", page_icon="🌙", layout="centered")
 
-ids_list = ["668462ced1cadd3592ad47be",
-            "668462ced1cadd3592ad47c6",
-            "668462ced1cadd3592ad47e3",
-            "668462ced1cadd3592ad47ef"]
-# Simulated results (full details of ayah)
-results = get_document_by_id(ids_list)
+# Simulated results
+results = [
+    {
+        "_id": {"$oid": "67974cb35e8e7e6047695ee3"},
+        "surah_no": 2,
+        "surah_name_ar": "البقرة",
+        "ayah_no_surah": 9,
+        "ayah_ar": "يُخَٰدِعُونَ ٱللَّهَ وَٱلَّذِينَ ءَامَنُوا۟ وَمَا يَخْدَعُونَ إِلَّآ أَنفُسَهُمْ وَمَا يَشْعُرُونَ",
+        "ayah_en": "They seek to deceive Allah and the believers, yet they only deceive themselves, but they fail to perceive it.",
+        "juz_no": 1,
+        "place_of_revelation": "مدنية",
+    }
+]
 
-# Custom CSS for a dark theme with Arabic font and professional header box
+# Quran-themed CSS with dark colors
 st.markdown("""
     <style>
     /* General styling */
     .stApp {
-        background-color: #121212;
-        color: #E0E0E0;
+        background-color: #0D0D0D;
+        color: #F0F0F0;
         direction: rtl;
-        font-family: 'Amiri Quran', serif; /* Ensure Amiri Quran font is applied */
-        max-width: 800px; /* Restrict the width of the content */
-        margin: 0 auto; /* Center the content */
+        font-family: 'Amiri Quran', 'Noto Naskh Arabic', serif;
+        max-width: 800px;
+        margin: 0 auto;
     }
 
+    /* Quranic color palette */
+    :root {
+        --quran-green: #0A5F2F;
+        --islamic-gold: #D4AF37;
+        --deep-blue: #1A365F;
+        --arabic-red: #8A2B32;
+    }
+
+    /* Search input styling */
     .stTextInput>div>input {
-        background-color: #333;
-        color: #fff;
-        border: 1px solid #444;
+        background-color: #1A1A1A;
+        color: #F0F0F0;
+        border: 2px solid var(--islamic-gold);
         border-radius: 8px;
-        height: 50px;
-        font-size: 16px;
-        padding-left: 15px;
+        height: 60px;
+        font-size: 20px;
+        padding: 10px 20px;
         text-align: right;
-        width: 100%;  /* Make the search input take full width */
+        width: 100%;
+        font-family: 'Amiri Quran', serif;
     }
 
-    /* Arabic font and styling */
-    @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap'); /* Correct font import */
+    /* Arabic fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;600&display=swap');
 
-    /* Styling for the search results container */
+    /* Results container */
     .results-container {
         margin-top: 40px;
-        padding: 30px;
-        background-color: #1F1F1F;
+        padding: 20px;
+        background-color: #1A1A1A;
         border-radius: 12px;
-        box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.5);
-        width: 100%;  /* Match the width of the search input */
+        border: 1px solid var(--quran-green);
     }
 
     .result-bubble {
-        background-color: #333333;
-        color: white;
-        border-radius: 12px;
-        padding: 15px;
-        margin: 10px 0;
-        max-width: 100%;
-        word-wrap: break-word;
+        background-color: #0A5F2F20;
+        color: #F0F0F0;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 20px 0;
+        border-left: 5px solid var(--islamic-gold);
     }
 
-    .result-header {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        background-color: #9C27B0;
-        padding: 10px;
-        border-radius: 10px;
-        text-align: center;
-    }
-
-    .result-body {
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-
-    /* Larger font for Ayah in Arabic */
     .ayah-arabic {
-        font-size: 20px;
+        font-size: 28px;
         font-weight: bold;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        color: var(--islamic-gold);
+        line-height: 2.5;
+        text-align: justify;
+        text-justify: inter-word;
     }
 
-    /* Styling for the header (title) */
+    /* Header styling */
     .header-container {
-        background-color: #333;
-        color: #fff;
-        padding: 30px;
+        background: linear-gradient(135deg, var(--quran-green) 0%, var(--deep-blue) 100%);
+        padding: 40px;
         border-radius: 12px;
-        box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.5);
-        text-align: center;
         margin-bottom: 40px;
+        border-bottom: 4px solid var(--islamic-gold);
     }
 
     .header-title {
-        font-size: 36px;
-        font-weight: bold;
-        color: #9C27B0;
+        font-size: 42px;
+        font-family: 'Noto Naskh Arabic', serif;
+        color: var(--islamic-gold);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
     .header-description {
-        font-size: 18px;
-        margin-top: 10px;
-        color: #B0B0B0;
+        font-size: 20px;
+        color: #C0C0C0;
+        margin-top: 15px;
     }
 
-    /* Specific color for the Surah and Ayah */
-    .surah-ayah-header {
-        font-size: 22px;
-        font-weight: bold;
-        color: #4CAF50; /* Green color, associated with the Quran */
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    /* Style for the form submit button */
+    /* Button styling */
     .stButton>button {
-        background-color: #9C27B0; /* Purple color for professional look */
-        color: white;
-        border: none;
+        background-color: var(--quran-green);
+        color: var(--islamic-gold) !important;
+        border: 2px solid var(--islamic-gold) !important;
         border-radius: 8px;
-        padding: 12px 30px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 18px 45px;
+        font-size: 20px;
+        font-family: 'Noto Naskh Arabic', serif;
+        transition: all 0.3s ease;
+        margin-top: 20px;
     }
 
-    /* Hover effect for the button */
     .stButton>button:hover {
-        background-color: #7B1FA2; /* Slightly darker purple on hover */
-        transform: scale(1.05);
+        background-color: var(--deep-blue) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
     }
 
-    /* Focus effect for the button */
-    .stButton>button:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px #9C27B0; /* Add focus ring */
+    /* Metadata styling */
+    .metadata {
+        font-family: 'Noto Naskh Arabic', serif;
+        color: #C0C0C0;
+        font-size: 16px;
+        border-top: 1px solid var(--quran-green);
+        padding-top: 15px;
+        margin-top: 20px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Professional header (box with gray background)
+# Quranic Header
 st.markdown("""
     <div class="header-container">
-        <h1 class="header-title">بحث في القرآن الكريم</h1>
-        <p class="header-description">اكتب سؤالك للبحث عن الآيات ذات الصلة.</p>
+        <h1 class="header-title">الباحث القرآني</h1>
+        <p class="header-description">الْقُرْآنُ هُدًى لِّلنَّاسِ وَبَيِّنَاتٍ مِّنَ الْهُدَىٰ وَالْفُرْقَانِ</p>
     </div>
 """, unsafe_allow_html=True)
 
-# Collect user input in Arabic
+# Search Form
 with st.form("search_form"):
-    user_query = st.text_input("أدخل سؤالك عن القرآن:", placeholder="على سبيل المثال: رحمة، صلاة، خلق...")
-    submit_button = st.form_submit_button(label="بحث", help="اضغط للبحث عن الآيات ذات الصلة.")
+    user_query = st.text_input("اكتب كلمات البحث هنا:", placeholder="﴿وَٱبْتَغُوا۟ فِيمَآ ءَاتَىٰكُمُ ٱللَّهُ﴾ [النساء:٣٤]...")
+    submit_button = st.form_submit_button(label="ابحث في القرآن")
 
-# Display results (simulated)
+# Display Results
 if submit_button and user_query:
     st.markdown("<div class='results-container'>", unsafe_allow_html=True)
     if results:
         for verse in results:
             st.markdown(f"""
                 <div class='result-bubble'>
-                    <div class='surah-ayah-header'>سورة {verse['surah_name_ar']} - آية {verse['ayah_no_surah']}</div>
                     <div class='ayah-arabic'>{verse['ayah_ar']}</div>
-                    <div class='result-body'>
-                        <strong>الترجمة إلى الإنجليزية:</strong> {verse['ayah_en']}
-                    </div>
-                    <div class='result-body'>
-                        <strong>رقم الجزء:</strong> {verse['juz_no']} <br>
-                        <strong>مكان النزول:</strong> {verse['place_of_revelation']}
+                    <div class='metadata'>
+                        <span>سورة {verse['surah_name_ar']} - الآية {verse['ayah_no_surah']}</span><br>
+                        <span>الجزء {verse['juz_no']} | {verse['place_of_revelation']}</span>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
     else:
-        st.error("لم يتم العثور على نتائج.")
+        st.error("لم يتم العثور على نتائج")
     st.markdown("</div>", unsafe_allow_html=True)
