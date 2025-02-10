@@ -57,7 +57,7 @@ class DataPreparation:
 
             merged_df = pd.merge(
                 tafseer_df, quran_df, left_on='sura_index', right_on='number', how='inner')
-            merged_df.to_csv('Qurani-AI/data_scripts/mergerd_df.csv')
+            merged_df.to_csv('data_scripts/mergerd_df.csv')
             return merged_df
         except Exception as e:
             raise Exception(f"Error while prepare_dataframe: {str(e)}")

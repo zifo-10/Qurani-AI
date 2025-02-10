@@ -6,7 +6,7 @@ from qdrant_client.models import VectorParams, Distance, PointStruct
 import cohere
 import pandas as pd
 from pymongo import MongoClient
-from bson import ObjectId
+from bson.objectid import ObjectId
 from models import MongoSchema
 
 
