@@ -4,7 +4,6 @@ from uuid import uuid4
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
 import cohere
-import pandas as pd
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from models import MongoSchema
@@ -25,6 +24,48 @@ class DataUploader:
         self.cohere_client = cohere.Client(api_key=cohere_api_key)
         self.mongo_client = MongoClient(mongo_uri)
 
+    def upload_data(self,
+                    mongo_db_name: str,
+                    mongo_collection_name: str,
+                    tafseer_df: list[dict],
+                    qdrant_collection_name: str,
+                    model: str = 'embed-multilingual-light-v3.0',
+                    vector_length: int = 384):
+        """
+        Uploads data to MongoDB and Qdrant.
+        Args:
+            mongo_db_name (str): The name of the MongoDB database.
+            mongo_collection_name (str): The name of the MongoDB collection.
+            tafseer_df (list[dict]): A list of dictionaries containing the data to be uploaded.
+            qdrant_collection_name (str): The name of the Qdrant collection.
+            model (str, optional): The model to be used for embedding the data. Defaults to 'embed-multilingual-light-v3.0'.
+            vector_length (int, optional): The length of the vectors to be used in Qdrant. Defaults to 384.
+        Returns:
+            str: A success message if the data is inserted successfully.
+        Raises:
+            Exception: If there is an error during the upload process.
+        """
+        try:
+            # Insert data into Mongo
+            mongo_ids = self.insert_data_into_mongo(
+                db_name=mongo_db_name, collection_name=mongo_collection_name, data_list=tafseer_df)
+
+            # Embed data
+            tafseer_list = [item['tafsir'] for item in tafseer_df]
+            tafseer_embedding_list = self.embed_data(
+                model=model, tafseer_text_list=tafseer_list, input_type='search_document')
+
+            # Construct point
+            points = self.construct_points(vectors=tafseer_embedding_list,
+                                           mongo_ids=mongo_ids,
+                                           mongo_collection_name=mongo_collection_name)
+
+            self.insert_data_into_qdrant(
+                points=points, collection_name=qdrant_collection_name, vector_length=vector_length)
+            return 'Data inserted successfully'
+        except Exception as e:
+            raise Exception(f"Error while upload_data: {str(e)}")
+        
     def embed_data(self, model: str, tafseer_text_list: List[str], input_type: str):
         """
         Embeds a list of tafseer texts using the specified model and input type.
@@ -67,47 +108,6 @@ class DataUploader:
         except Exception as e:
             raise Exception(f"Error while insert_data_into_qdrant: {str(e)}")
 
-    def upload_data(self,
-                    mongo_db_name: str,
-                    mongo_collection_name: str,
-                    tafseer_df: list[dict],
-                    qdrant_collection_name: str,
-                    model: str = 'embed-multilingual-light-v3.0',
-                    vector_length: int = 384):
-        """
-        Uploads data to MongoDB and Qdrant.
-        Args:
-            mongo_db_name (str): The name of the MongoDB database.
-            mongo_collection_name (str): The name of the MongoDB collection.
-            tafseer_df (list[dict]): A list of dictionaries containing the data to be uploaded.
-            qdrant_collection_name (str): The name of the Qdrant collection.
-            model (str, optional): The model to be used for embedding the data. Defaults to 'embed-multilingual-light-v3.0'.
-            vector_length (int, optional): The length of the vectors to be used in Qdrant. Defaults to 384.
-        Returns:
-            str: A success message if the data is inserted successfully.
-        Raises:
-            Exception: If there is an error during the upload process.
-        """
-        try:
-            # Insert data into Mongo
-            mongo_ids = self.insert_data_into_mongo(
-                db_name=mongo_db_name, collection_name=mongo_collection_name, data_list=tafseer_df)
-
-            # Embed data
-            tafseer_list = [item['Tafsser'] for item in tafseer_df]
-            tafseer_embedding_list = self.embed_data(
-                model=model, tafseer_text_list=tafseer_list, input_type='search_document')
-            
-            # Construct point
-            points = self.construct_points(vectors=tafseer_embedding_list,
-                                           mongo_ids=mongo_ids,
-                                           mongo_collection_name=mongo_collection_name)
-            self.insert_data_into_qdrant(
-                points=points, collection_name=qdrant_collection_name, vector_length=vector_length)
-            return 'Data inserted successfully'
-        except Exception as e:
-            raise Exception(f"Error while upload_data: {str(e)}")
-
     def insert_data_into_mongo(self, db_name: str, collection_name: str, data_list: list[dict]):
         """
         Inserts a list of dictionaries into a specified MongoDB collection.
@@ -126,17 +126,11 @@ class DataUploader:
             collection = db[collection_name]
 
             # Insert data into MongoDB
-            validated_data = [MongoSchema(ayah=data_list[i]['Ayah'],
-                                          tasfeer=data_list[i]['Tafsser'],
-                                          sura_index=data_list[i]['sura_index'],
-                                          aya_index=data_list[i]['aya_index'],
-                                          sura_name=json.loads(
-                                              data_list[i]['name']),
-                                          sura_type=json.loads(
-                                              data_list[i]['revelation_place']),
-                                          chunks=[data_list[i]['Ayah']],
-                                          tasfeer_name="Mokhtaser tafseer"
-                                          ) for i in range(len(data_list))]
+            validated_data = [MongoSchema(**{**item,
+                                          'chunks': [item['tafsir']],
+                                          'tafsir_name':"Mokhtaser tafsir",
+                                          'surah_name_en': item['surah_name_roman']
+                                          }) for item in data_list]
             insert_data = [item.model_dump() for item in validated_data]
             result = collection.insert_many(insert_data)
             return result.inserted_ids

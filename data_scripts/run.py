@@ -1,8 +1,9 @@
-from prepare_data import DataPreparation
-from uplaod_data import DataUploader
 from dotenv import load_dotenv
 import os
+import pandas as pd
 
+from urtils import download_tafseer_data, prepare_json_data
+from uplaod_data import DataUploader
 
 # load .end file
 load_dotenv()
@@ -11,10 +12,9 @@ load_dotenv()
 # DataPreparation().download_tafseer_data()
 
 # Prepare data
-all_df = DataPreparation().prepare_dataframe(tafseer_df_path=os.getenv('TAFSEER_DF_PATH'),
-                                             quran_df_path=os.getenv('QURAN_DF_PATH'))
+aqurani_data = pd.read_csv(os.getenv('QURANI_DF_PATH'))
 
-data_list = DataPreparation().prepare_json_data(df=all_df)
+data_list = prepare_json_data(df=aqurani_data)
 
 # Upload data
 data_uploder = DataUploader(qdrant_url=os.getenv('QDRANT_URL'),
@@ -28,6 +28,6 @@ inserted_data = data_uploder.upload_data(mongo_db_name=os.getenv('MONGO_DB_NAME'
                                              'MONGO_COLLECTION_NAME'),
                                          qdrant_collection_name=os.getenv(
                                              'QDRANT_COLLECTION_NAME'),
-                                         tafseer_df=data_list[0:5])
+                                         tafseer_df=data_list[0:50])
 
 print(inserted_data)
