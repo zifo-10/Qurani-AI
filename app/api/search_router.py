@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends
 
+from app.api.dependencies import get_search_service
 from app.models.aya import QuranModel
 from app.services.search_service import SearchService
-from app.api.dependencies import get_search_service
 
 quran_search = APIRouter()
 
-@quran_search.get("")
+
+@quran_search.post("")
 def search(
-    query: str,
-    search_service: SearchService = Depends(get_search_service)
+        query: str,
+        search_service: SearchService = Depends(get_search_service)
 ) -> dict[str, list[QuranModel]]:
     """
     Search for a given query using the search service.
