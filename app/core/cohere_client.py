@@ -1,7 +1,9 @@
 import cohere
 
+from app.core.embedding_interface import EmbeddingClient
 
-class CohereClient:
+
+class CohereClient(EmbeddingClient):
     def __init__(self, api_key: str):
         """
         Initialize the Cohere client with the provided API key.
@@ -10,7 +12,7 @@ class CohereClient:
         """
         self.client = cohere.Client(api_key=api_key)
 
-    def embed_text(self, texts, model, input_type, embedding_types) -> list:
+    def embed_text(self, texts, model = "embed-multilingual-light-v3.0", input_type = "search_query", embedding_types = ["float"]) -> list:
         """
         Embed a list of texts using the specified model and input type.
 

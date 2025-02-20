@@ -1,6 +1,11 @@
-import os
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
+
+from app.core.e5_client import E5Client  
+
+# Initialize the embedding model once
+embedding_model = E5Client()  
+
 
 # Load environment variables from .env file
 load_dotenv()
