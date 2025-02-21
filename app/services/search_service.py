@@ -1,12 +1,13 @@
 from app.core.cohere_client import CohereClient
+from app.core.embedding_interface import EmbeddingClient
 from app.core.mongo_cleint import MongoRepository
 from app.core.vector_db import VectorDB
 
 
 class SearchService:
-    def __init__(self, qdrant: VectorDB, cohere: CohereClient, mongo_repo: MongoRepository):
+    def __init__(self, qdrant: VectorDB, embedding_client: EmbeddingClient, mongo_repo: MongoRepository):
         self.qdrant = qdrant
-        self.cohere = cohere
+        self.embedding_client = embedding_client
         self.mongo_repo = mongo_repo
 
     def search(self, query: str) -> dict:
@@ -21,13 +22,11 @@ class SearchService:
         """
         try:
             # Step 1: Embed query
-            embedding = self.cohere.embed_text(texts=[query],
-                                               model="embed-multilingual-light-v3.0",
-                                               input_type="search_query",
-                                               embedding_types=["float"])
+            embedding = self.embedding_client.embed_text(texts=[f"query: {query}"])
             # Step 2: Search in Qdrant
             search_results = self.qdrant.search(vector=embedding,
-                                                limit=5)
+                                                limit=5,
+                                                score_threshold=0.84)
             # Step 3: Fetch additional data from MongoDB
             enriched_results = self.mongo_repo.get_data(search_results)
 
